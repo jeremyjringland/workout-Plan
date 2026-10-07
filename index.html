@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>12-Week Half Marathon Training & Core/Strength Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        msblue: '#0066CC',
+                        msbluehover: '#004499',
+                        slatebg: '#F8FAFC',
+                    },
+                    fontFamily: {
+                        sans: ['Calibri', 'Arial', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Calibri', 'Segoe UI', Arial, sans-serif; background-color: #F8FAFC; color: #1E293B; }
+        .word-link {
+            color: #0066CC;
+            text-decoration: underline;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .word-link:hover {
+            color: #004499;
+            text-decoration: underline;
+        }
+        .word-link-active {
+            color: #003366;
+            font-weight: 700;
+            text-decoration: underline;
+        }
+        .clean-border {
+            border: 1px solid #CBD5E1;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <!-- Header Section -->
+    <header class="bg-white border-b border-slate-300 py-6 px-4 sm:px-8 shadow-sm">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">12-Week Half Marathon Training Plan</h1>
+                <p class="text-sm text-slate-600 mt-1">Baseline 5K Time: 26:06 (8:24/mi) | Goal Race Time: Sub-2:00:00 (9:10-9:25/mi)</p>
+            </div>
+            <div class="flex items-center space-x-6 text-sm">
+                <div>
+                    <span class="block text-xs font-semibold text-slate-500 uppercase">Runs Completed</span>
+                    <span id="run-progress" class="font-bold text-slate-800">0/60</span>
+                </div>
+                <div>
+                    <span class="block text-xs font-semibold text-slate-500 uppercase">Strength Completed</span>
+                    <span id="strength-progress" class="font-bold text-slate-800">0/24</span>
+                </div>
+                <div>
+                    <span class="block text-xs font-semibold text-slate-500 uppercase">Core Completed</span>
+                    <span id="core-progress" class="font-bold text-slate-800">0/24</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8">
+
+        <!-- Target Paces Reference Bar -->
+        <section class="bg-white p-5 rounded-md clean-border shadow-sm">
+            <h2 class="text-base font-bold text-slate-800 border-b border-slate-200 pb-2 mb-3">Target Paces & Guidelines</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                    <span class="block font-semibold text-slate-700">Easy / Recovery</span>
+                    <span class="text-slate-900 font-bold">10:15 - 11:00 /mi</span>
+                </div>
+                <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                    <span class="block font-semibold text-slate-700">Half Marathon Pace</span>
+                    <span class="text-slate-900 font-bold">9:10 - 9:25 /mi</span>
+                </div>
+                <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                    <span class="block font-semibold text-slate-700">Tempo / Threshold</span>
+                    <span class="text-slate-900 font-bold">8:45 - 9:00 /mi</span>
+                </div>
+                <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                    <span class="block font-semibold text-slate-700">5K / Speed Pace</span>
+                    <span class="text-slate-900 font-bold">8:15 - 8:25 /mi</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation and Controls -->
+        <section class="bg-white p-4 rounded-md clean-border shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <!-- Phase Filters -->
+                <div class="flex flex-wrap items-center gap-3 text-sm">
+                    <span class="font-bold text-slate-700">Phase:</span>
+                    <a onclick="setPhaseFilter('all')" id="phase-all" class="word-link word-link-active">All Weeks</a>
+                    <span>|</span>
+                    <a onclick="setPhaseFilter(1)" id="phase-1" class="word-link">Phase 1 (Base)</a>
+                    <span>|</span>
+                    <a onclick="setPhaseFilter(2)" id="phase-2" class="word-link">Phase 2 (Build)</a>
+                    <span>|</span>
+                    <a onclick="setPhaseFilter(3)" id="phase-3" class="word-link">Phase 3 (Peak)</a>
+                    <span>|</span>
+                    <a onclick="setPhaseFilter(4)" id="phase-4" class="word-link">Phase 4 (Taper)</a>
+                </div>
+
+                <!-- Type Filters -->
+                <div class="flex items-center space-x-3 text-sm">
+                    <span class="font-bold text-slate-700">Category:</span>
+                    <a onclick="setTypeFilter('all')" id="type-all" class="word-link word-link-active">All Workouts</a>
+                    <span>|</span>
+                    <a onclick="setTypeFilter('run')" id="type-run" class="word-link">Running Only</a>
+                    <span>|</span>
+                    <a onclick="setTypeFilter('strength')" id="type-strength" class="word-link">Strength Only</a>
+                    <span>|</span>
+                    <a onclick="setTypeFilter('core')" id="type-core" class="word-link">Core Only</a>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between border-t border-slate-200 pt-3 text-xs">
+                <div>
+                    <a onclick="jumpToActiveWeek()" class="word-link font-semibold">Jump to Current Active Week</a>
+                    <span class="text-slate-400 mx-2">|</span>
+                    <a onclick="scrollToCoreGuide()" class="word-link font-semibold">View Core & Strength Form Guide</a>
+                </div>
+                <a onclick="resetProgress()" class="word-link text-slate-500">Reset All Checked Progress</a>
+            </div>
+        </section>
+
+        <!-- Weeks Container -->
+        <section id="weeks-container" class="space-y-6">
+            <!-- Programmatically populated by JavaScript -->
+        </section>
+
+        <!-- Comprehensive Strength & Core Guide -->
+        <section id="core-guide" class="bg-white p-6 rounded-md clean-border shadow-sm space-y-6">
+            <div class="border-b border-slate-200 pb-3">
+                <h2 class="text-xl font-bold text-slate-900">Runner Strength & Core Form Guide (35-40 Minutes Max)</h2>
+                <p class="text-sm text-slate-600 mt-1">Equipment needed: Kettlebell (KB), Dumbbells (DB), and Flat Bench. Rest 45-60 seconds between sets to maintain density.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                <!-- Routine 1 -->
+                <div class="space-y-3 bg-slate-50 p-4 rounded border border-slate-200">
+                    <h3 class="font-bold text-base text-slate-800 border-b border-slate-300 pb-1">Level 1: Anti-Extension Core & Glute Base</h3>
+                    <p class="text-xs text-slate-600">Focus: Preventing lower back hyperextension when fatigue hits late in long runs.</p>
+                    <ul class="space-y-2 text-xs">
+                        <li>
+                            <strong class="block text-slate-800">1. Deadbugs (3 sets x 10 reps/side)</strong>
+                            <span class="text-slate-600">Lie back flat, press lower back into floor. Extend opposite arm/leg under control without letting spine arch.</span>
+                            <br><a href="https://www.youtube.com/results?search_query=how+to+do+deadbugs+exercise+runners" target="_blank" class="word-link">Watch Demonstration Video</a>
+                        </li>
+                        <li>
+                            <strong class="block text-slate-800">2. Kettlebell Suitcase Carry (3 sets x 40 sec/side)</strong>
+                            <span class="text-slate-600">Hold heavy KB in one hand at side. Walk tall without leaning sideways.</span>
+                            <br><a href="https://www.youtube.com/results?search_query=how+to+do+kettlebell+suitcase+carry" target="_blank" class="word-link">Watch Demonstration Video</a>
+                        </li>
+                        <li>
+                            <strong class="block text-slate-800">3. Kettlebell Romanian Deadlift (3 sets x 10-12 reps)</strong>
+                            <span class="text-slate-600">Hinge hips backward with flat spine. Squeeze glutes at top.</span>
+                            <br><a href="https://www.youtube.com/results?search_query=how+to+do+kettlebell+romanian+deadlift" target="_blank" class="word-link">Watch Demonstration Video</a>
+                        </li>
+                        <li>
+                            <strong class="block text-slate-800">4. Dumbbell Bulgarian Split Squat (3 sets x 8 reps/leg)</strong>
+                            <span class="text-slate-600">Rear foot elevated on bench. Lower hips vertically to strengthen quads/glutes.</span>
+                            <br><a href="https://www.youtube.com/results?search_query=how+to+do+dumbbell+bulgarian+split+squat+bench" target="_blank" class="word-link">Watch Demonstration Video</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Routine 2 -->
+                <div class="space-y-3 bg-slate-50 p-4 rounded border border-slate-200">
+                    <h3 class="font-bold text-base text-slate-800 border-b border-slate-300 pb-1">Level 2: Lateral Core & Pelvic Control</h3>
+                    <p class="text-xs text-slate-600">Focus: Oblique endurance and pelvic stabilization to eliminate torso sway.</p>
+                    <ul class="space-y-2 text-xs">
+                        <li>
+                            <strong class="block text-slate-800">1. Side Plank Hold (3 sets x 30 sec/side)</strong>
+                            <span class="text-slate-600">Elbow under shoulder, stack feet or place top foot on bench. Drive hips elevated.</span>
+                            <br><a href="https://www.youtube.com/results?search_query=how+to+do+side+plank+hold" target="_blank" class="word-link">Watch Demonstration Video</a>
+                        </li>
+                        <li>
+                            <strong class="block text-slate-800">2. Bench Dumbbell Bird-Dog Row (3 sets x 8 reps/side)</strong>
+                            <span class="text-slate-600">Knee and hand on bench, extend opposite leg straight back. Row dumbbell without hips tilting.</span>
+                            <br><a href="https://www.youtube.com/results?search_query=how+to+do+bench+dumbbell+bird-dog+row" target="_blank" class="word-link">Watch Demonstration Video</a>
+                        </li>
+                        <li>
+                            <strong class="block text-slate-800">3. Single-Leg Calf Raise on Bench Step (3 sets x 15 reps/leg)</strong>
+                            <span class="text-slate-600">Ball of foot on bench ledge. Lower slow over 3 seconds to bulletproof calf/Achilles.</span>
+                            <br><a href="https://www.youtube.com/results?search_query=how+to+do+single-leg+dumbbell+calf+raises+runners" target="_blank" class="word-link">Watch Demonstration Video</a>
+                        </li>
+                        <li>
+                            <strong class="block text-slate-800">4. Single-Leg Bench Hip Thrust (3 sets x 10 reps/leg)</strong>
+                            <span class="text-slate-600">Upper back resting on bench edge. Drive through heel to lock out hips at top.</span>
+                            <br><a href="https://www.youtube.com/results?search_query=how+to+do+single-leg+bench+hip+thrust" target="_blank" class="word-link">Watch Demonstration Video</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Routine 3 -->
+                <div class="space-y-3 bg-slate-50 p-4 rounded border border-slate-200">
+                    <h3 class="font-bold text-base text-slate-800 border-b border-slate-300 pb-1">Level 3: Rotational Power & Upper Drive</h3>
+                    <p class="text-xs text-slate-600">Focus: Thoracic spine mobility and upper back posture for efficient arm swing.</p>
+                    <ul class="space-y-2 text-xs">
+                        <li>
+                            <strong class="block text-slate-800">1. Kettlebell Plank Drag-Through (3 sets x 8 reps/side)</strong>
+                            <span class="text-slate-600">High plank over weight. Reach under torso with far hand to pull weight across floor.</span>
+                            <br><a href="https://www.youtube.com/results?search_query=how+to+do+kettlebell+plank+drag+through" target="_blank" class="word-link">Watch Demonstration Video</a>
+                        </li>
+                        <li>
+                            <strong class="block text-slate-800">2. Bench Hollow Body Leg Raises (3 sets x 12 reps)</strong>
+                            <span class="text-slate-600">Lie on bench holding edge behind head. Lower legs under full control.</span>
+                            <br><a href="https://www.youtube.com/results?search_query=how+to+do+bench+hollow+body+leg+raise" target="_blank" class="word-link">Watch Demonstration Video</a>
+                        </li>
+                        <li>
+                            <strong class="block text-slate-800">3. Dumbbell Bench Chest Press or Row (3 sets x 10 reps)</strong>
+                            <span class="text-slate-600">Strengthen upper torso and posture muscles to prevent rounding in miles 10-13.</span>
+                            <br><a href="https://www.youtube.com/results?search_query=how+to+do+dumbbell+bench+press+or+row" target="_blank" class="word-link">Watch Demonstration Video</a>
+                        </li>
+                        <li>
+                            <strong class="block text-slate-800">4. Kettlebell Halos & T-Spine Bench Stretch (3 sets x 10 reps / 45 sec)</strong>
+                            <span class="text-slate-600">Rotate kettlebell smoothly around head, then stretch elbows over bench edge.</span>
+                            <br><a href="https://www.youtube.com/results?search_query=how+to+do+kettlebell+halo+exercise" target="_blank" class="word-link">Watch Demonstration Video</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript Execution Logic -->
+    <script>
+        const planData = [
+            {
+                week: 1, phase: 1, phaseTitle: "Phase 1: Aerobic Base & Endurance", focus: "Establishing baseline rhythm & core anti-extension foundation", estMiles: "18.5 mi",
+                schedule: [
+                    { day: "Mon", type: "Core + Strength", category: "core", title: "L1 Core & Upper Base", details: "35-40 mins: Deadbugs, KB Suitcase Carries, DB Bench Press, T-Spine Stretch.", distance: "35-40m" },
+                    { day: "Tue", type: "Quality Run", category: "run", title: "4 Mi Tempo Intervals", details: "1 mi warm-up, 4x 3-min Tempo @ 8:50/mi w/ 90s easy jog recovery, 1 mi cool-down.", distance: "4.0 mi" },
+                    { day: "Wed", type: "Easy Run", category: "run", title: "Easy Aerobic Run", details: "Conversational pace (10:15-11:00/mi). Keep heart rate low.", distance: "3.0 mi" },
+                    { day: "Thu", type: "Run + Core", category: "both", title: "3M Easy Run + Core Touchpoint", details: "3 mi Easy Run + 15 min Core (Deadbugs & Pallof Holds).", distance: "3.0 mi" },
+                    { day: "Fri", type: "Strength", category: "strength", title: "L1 Strength: Glutes & Legs", details: "35-40 mins: KB RDLs, DB Bulgarian Split Squats, Single-leg Hip Thrusts.", distance: "35-40m" },
+                    { day: "Sat", type: "Long Run", category: "run", title: "5 Mile Easy Long Run", details: "Steady, comfortable aerobic pace (10:15-10:45/mi).", distance: "5.0 mi" },
+                    { day: "Sun", type: "Rest", category: "rest", title: "Active Recovery or Rest", details: "30 min light walking or stretching.", distance: "0 mi" }
+                ]
+            },
+            {
+                week: 2, phase: 1, phaseTitle: "Phase 1: Aerobic Base & Endurance", focus: "5K pace touchpoint & core anti-rotation stability", estMiles: "19.5 mi",
+                schedule: [
+                    { day: "Mon", type: "Core + Strength", category: "core", title: "L1 Core: Anti-Rotation Base", details: "35-40 mins: KB Suitcase Marches, Deadbugs, DB Rows.", distance: "35-40m" },
+                    { day: "Tue", type: "Quality Run", category: "run", title: "5K Speed Intervals", details: "1 mi warm-up, 6x 2-min @ 5K pace (~8:20/mi) w/ 90s jog recovery, 1 mi cool-down.", distance: "4.0 mi" },
+                    { day: "Wed", type: "Easy Run", category: "run", title: "Easy Aerobic Run", details: "Relaxed conversational pace.", distance: "3.5 mi" },
+                    { day: "Thu", type: "Run + Core", category: "both", title: "3M Run + Express Core", details: "3 mi Easy Run + 15 min Core (Plank holds & Hollow Body holds).", distance: "3.0 mi" },
+                    { day: "Fri", type: "Strength", category: "strength", title: "L1 Strength: Lower & Glutes", details: "35-40 mins: KB Goblet Squats, Single-leg Calf Raises, RDLs.", distance: "35-40m" },
+                    { day: "Sat", type: "Long Run", category: "run", title: "6 Mile Long Run", details: "Easy steady effort throughout.", distance: "6.0 mi" },
+                    { day: "Sun", type: "Rest", category: "rest", title: "Rest Day", details: "Complete rest, hydrate and foam roll.", distance: "0 mi" }
+                ]
+            },
+            {
+                week: 3, phase: 1, phaseTitle: "Phase 1: Aerobic Base & Endurance", focus: "Longer threshold reps & 7-mile long run milestone", estMiles: "22.0 mi",
+                schedule: [
+                    { day: "Mon", type: "Core + Strength", category: "core", title: "L1 Core + Upper Drive", details: "35-40 mins: Deadbugs, KB Halos, Bench Press.", distance: "35-40m" },
+                    { day: "Tue", type: "Quality Run", category: "run", title: "2x 10-Min Threshold", details: "1 mi warm-up, 2x 10-min @ Tempo (~8:50/mi) w/ 3m jog recovery, 1 mi cool-down.", distance: "4.5 mi" },
+                    { day: "Wed", type: "Easy Run", category: "run", title: "Easy Aerobic Run", details: "Easy conversational pace.", distance: "4.0 mi" },
+                    { day: "Thu", type: "Run + Core", category: "both", title: "3.5M Run + Express Core", details: "3.5 mi Easy Run + 15 min Suitcase Carries.", distance: "3.5 mi" },
+                    { day: "Fri", type: "Strength", category: "strength", title: "L1 Strength: Hip Power", details: "35-40 mins: KB Swings, Split Squats, Single-leg Hip Thrusts.", distance: "35-40m" },
+                    { day: "Sat", type: "Long Run", category: "run", title: "7 Mile Long Run", details: "Strictly in Zone 2 aerobic effort.", distance: "7.0 mi" },
+                    { day: "Sun", type: "Rest", category: "rest", title: "Active Recovery", details: "Light walking or mobility.", distance: "0 mi" }
+                ]
+            },
+            {
+                week: 4, phase: 1, phaseTitle: "Phase 1: Aerobic Base & Endurance", focus: "Deload week: Reduced volume & bodyweight core touchpoint", estMiles: "15.0 mi",
+                schedule: [
+                    { day: "Mon", type: "Rest", category: "rest", title: "Rest & Mobility", details: "Full rest day.", distance: "0 mi" },
+                    { day: "Tue", type: "Quality Run", category: "run", title: "Easy Run + Strides", details: "1 mi warm-up, 3 mi easy w/ 4x 100m strides, 1 mi cool-down.", distance: "4.0 mi" },
+                    { day: "Wed", type: "Easy Run", category: "run", title: "Easy Recovery Run", details: "Very easy recovery pace.", distance: "3.0 mi" },
+                    { day: "Thu", type: "Core", category: "core", title: "Deload Core Touchpoint", details: "20 mins bodyweight Deadbugs and Side Planks.", distance: "20 min" },
+                    { day: "Fri", type: "Rest", category: "rest", title: "Rest Day", details: "Complete rest.", distance: "0 mi" },
+                    { day: "Sat", type: "Long Run", category: "run", title: "5 Mile Deload Long Run", details: "Relaxed 5 miles easy.", distance: "5.0 mi" },
+                    { day: "Sun", type: "Rest", category: "rest", title: "Active Recovery", details: "Light stretching.", distance: "0 mi" }
+                ]
+            },
+            {
+                week: 5, phase: 2, phaseTitle: "Phase 2: Half Marathon Specificity", focus: "Level 2 Lateral Core stability & 8-mile fuel practice", estMiles: "20.5 mi",
+                schedule: [
+                    { day: "Mon", type: "Core + Strength", category: "core", title: "L2 Core: Lateral Stability", details: "35-40 mins: Side Planks, Bird-Dog Rows, DB Press.", distance: "35-40m" },
+                    { day: "Tue", type: "Quality Run", category: "run", title: "3 Miles @ HMP", details: "1 mi warm-up, 3 miles sustained @ HMP (9:15/mi), 1 mi cool-down.", distance: "5.0 mi" },
+                    { day: "Wed", type: "Easy Run", category: "run", title: "Easy Aerobic Run", details: "Conversational pace.", distance: "4.0 mi" },
+                    { day: "Thu", type: "Run + Core", category: "both", title: "3.5M Run + Express Core", details: "3.5 mi Easy Run + 15 min Side Plank variations.", distance: "3.5 mi" },
+                    { day: "Fri", type: "Strength", category: "strength", title: "L2 Strength: Calf & Pelvic Power", details: "35-40 mins: Single-leg Calf Raises, KB RDLs.", distance: "35-40m" },
+                    { day: "Sat", type: "Long Run", category: "run", title: "8 Mile Long Run", details: "Practice taking energy gel at minute 35.", distance: "8.0 mi" },
+                    { day: "Sun", type: "Rest", category: "rest", title: "Rest & Mobility", details: "Hydrate & light walking.", distance: "0 mi" }
+                ]
+            },
+            {
+                week: 6, phase: 2, phaseTitle: "Phase 2: Half Marathon Specificity", focus: "Oblique control & fast-finish long run", estMiles: "22.0 mi",
+                schedule: [
+                    { day: "Mon", type: "Core + Strength", category: "core", title: "L2 Core: Oblique & Arm Drive", details: "35-40 mins: Bench Bird-Dog Rows, DB Press, Halos.", distance: "35-40m" },
+                    { day: "Tue", type: "Quality Run", category: "run", title: "4x 1-Mile Tempos", details: "1 mi warm-up, 4x 1m @ Tempo (~8:50/mi) w/ 2m jog recovery, 1 mi cool-down.", distance: "5.0 mi" },
+                    { day: "Wed", type: "Easy Run", category: "run", title: "Easy Aerobic Run", details: "Easy pace.", distance: "4.0 mi" },
+                    { day: "Thu", type: "Run + Core", category: "both", title: "4M Run + Express Core", details: "4 mi Easy Run + 15 min Suitcase Carries.", distance: "4.0 mi" },
+                    { day: "Fri", type: "Strength", category: "strength", title: "L2 Strength: Glutes & Achilles", details: "35-40 mins: Split Squats, Single-Leg Calf Raises.", distance: "35-40m" },
+                    { day: "Sat", type: "Long Run", category: "run", title: "9 Miles Fast Finish", details: "First 7 miles easy, last 2 miles @ HMP (9:15/mi).", distance: "9.0 mi" },
+                    { day: "Sun", type: "Rest", category: "rest", title: "Rest Day", details: "Complete rest day.", distance: "0 mi" }
+                ]
+            },
+            {
+                week: 7, phase: 2, phaseTitle: "Phase 2: Half Marathon Specificity", focus: "4 Miles @ HMP & 10-mile long run milestone", estMiles: "23.5 mi",
+                schedule: [
+                    { day: "Mon", type: "Core + Strength", category: "core", title: "L2 Core + Arm Drive", details: "35-40 mins: Side Planks, Bird-Dog Rows, DB Press.", distance: "35-40m" },
+                    { day: "Tue", type: "Quality Run", category: "run", title: "4 Miles @ HMP", details: "1 mi warm-up, 4 miles sustained @ HMP (9:15/mi), 1 mi cool-down.", distance: "5.5 mi" },
+                    { day: "Wed", type: "Easy Run", category: "run", title: "Easy Aerobic Run", details: "Conversational pace.", distance: "4.0 mi" },
+                    { day: "Thu", type: "Run + Core", category: "both", title: "4M Run + Express Core", details: "4 mi Easy Run + 15 min Core.", distance: "4.0 mi" },
+                    { day: "Fri", type: "Strength", category: "strength", title: "L2 Strength: Single-Leg Balance", details: "35-40 mins: Split Squats, Single-Leg Thrusts.", distance: "35-40m" },
+                    { day: "Sat", type: "Long Run", category: "run", title: "10 Mile Long Run", details: "Milestone run! Practice gel at 35 min and 70 min.", distance: "10.0 mi" },
+                    { day: "Sun", type: "Rest", category: "rest", title: "Rest Day", details: "Active recovery.", distance: "0 mi" }
+                ]
+            },
+            {
+                week: 8, phase: 2, phaseTitle: "Phase 2: Half Marathon Specificity", focus: "Mid-plan deload & hill repeats", estMiles: "16.5 mi",
+                schedule: [
+                    { day: "Mon", type: "Rest", category: "rest", title: "Rest & Foam Roll", details: "Full rest.", distance: "0 mi" },
+                    { day: "Tue", type: "Quality Run", category: "run", title: "Hill Repeats", details: "1 mi warm-up, 5x 1-min hard hill repeats w/ walk down, 1 mi cool-down.", distance: "4.0 mi" },
+                    { day: "Wed", type: "Easy Run", category: "run", title: "Easy Aerobic Run", details: "Recovery pace.", distance: "3.5 mi" },
+                    { day: "Thu", type: "Core", category: "core", title: "Light Core Touchpoint", details: "20 mins light Deadbugs & Suitcase Marches.", distance: "20 min" },
+                    { day: "Fri", type: "Rest", category: "rest", title: "Rest Day", details: "Complete rest.", distance: "0 mi" },
+                    { day: "Sat", type: "Long Run", category: "run", title: "6 Mile Deload Long Run", details: "Relaxed 6 miles easy.", distance: "6.0 mi" },
+                    { day: "Sun", type: "Rest", category: "rest", title: "Active Recovery", details: "Light walking.", distance: "0 mi" }
+                ]
+            },
+            {
+                week: 9, phase: 3, phaseTitle: "Phase 3: Peak Volume & Race Sharpness", focus: "Level 3 Rotational Core & 11-mile peak endurance", estMiles: "25.0 mi",
+                schedule: [
+                    { day: "Mon", type: "Core + Strength", category: "core", title: "L3 Core: Rotational Power", details: "35-40 mins: KB Drag-Throughs, Bench Leg Raises, DB Press.", distance: "35-40m" },
+                    { day: "Tue", type: "Quality Run", category: "run", title: "5 Miles @ HMP", details: "1 mi warm-up, 5 miles sustained @ HMP (9:15/mi), 1 mi cool-down.", distance: "6.0 mi" },
+                    { day: "Wed", type: "Easy Run", category: "run", title: "Easy Aerobic Run", details: "Easy pace.", distance: "4.0 mi" },
+                    { day: "Thu", type: "Run + Core", category: "both", title: "4M Run + Express Core", details: "4 mi Easy Run + 15 min Rotational Core.", distance: "4.0 mi" },
+                    { day: "Fri", type: "Strength", category: "strength", title: "L3 Strength: Glute Power", details: "35-40 mins: KB RDLs, Bulgarian Split Squats.", distance: "35-40m" },
+                    { day: "Sat", type: "Long Run", category: "run", title: "11 Mile Long Run", details: "Steady aerobic pace. Fuel at 35 min and 70 min.", distance: "11.0 mi" },
+                    { day: "Sun", type: "Rest", category: "rest", title: "Rest Day", details: "Rest & stretch.", distance: "0 mi" }
+                ]
+            },
+            {
+                week: 10, phase: 3, phaseTitle: "Phase 3: Peak Volume & Race Sharpness", focus: "12 Mile Peak Long Run & ultimate fatigue resistance", estMiles: "25.5 mi",
+                schedule: [
+                    { day: "Mon", type: "Core + Strength", category: "core", title: "L3 Core: Fatigue Resistance", details: "35-40 mins: KB Drag-Throughs, Bench Raises, Halos.", distance: "35-40m" },
+                    { day: "Tue", type: "Quality Run", category: "run", title: "3x 1.5M Tempos", details: "1 mi warm-up, 3x 1.5m @ Tempo (~8:50/mi) w/ 3m jog recovery, 1 mi cool-down.", distance: "5.5 mi" },
+                    { day: "Wed", type: "Easy Run", category: "run", title: "Easy Aerobic Run", details: "Easy effort.", distance: "4.0 mi" },
+                    { day: "Thu", type: "Run + Core", category: "both", title: "4M Run + Express Core", details: "4 mi Easy Run + 15 min Core (Final heavy core session).", distance: "4.0 mi" },
+                    { day: "Fri", type: "Strength", category: "strength", title: "L3 Strength: Final Heavy Legs", details: "35-40 mins: Calf Raises, Hip Thrusts.", distance: "35-40m" },
+                    { day: "Sat", type: "Long Run", category: "run", title: "12 Mile Peak Long Run", details: "8 mi Easy + 3 mi HMP + 1 mi Easy. Full race rehearsal!", distance: "12.0 mi" },
+                    { day: "Sun", type: "Rest", category: "rest", title: "Rest Day", details: "Rest & recover.", distance: "0 mi" }
+                ]
+            },
+            {
+                week: 11, phase: 4, phaseTitle: "Phase 4: Taper & Race Week", focus: "Sharpening & light core maintenance", estMiles: "18.0 mi",
+                schedule: [
+                    { day: "Mon", type: "Rest", category: "rest", title: "Rest & Mobility", details: "Foam roll.", distance: "0 mi" },
+                    { day: "Tue", type: "Quality Run", category: "run", title: "2x 1-Mile HMP", details: "1 mi warm-up, 2x 1m @ HMP (9:15/mi) w/ 2m jog recovery, 1 mi cool-down.", distance: "4.5 mi" },
+                    { day: "Wed", type: "Easy Run", category: "run", title: "Easy Aerobic Run", details: "Relaxed easy run.", distance: "3.5 mi" },
+                    { day: "Thu", type: "Core", category: "core", title: "Light Taper Core", details: "15 mins bodyweight Deadbugs & Side Planks.", distance: "15 min" },
+                    { day: "Fri", type: "Rest", category: "rest", title: "Rest Day", details: "Complete rest.", distance: "0 mi" },
+                    { day: "Sat", type: "Long Run", category: "run", title: "7 Mile Taper Run", details: "Easy and relaxed pace.", distance: "7.0 mi" },
+                    { day: "Sun", type: "Rest", category: "rest", title: "Active Recovery", details: "Rest & hydrate.", distance: "0 mi" }
+                ]
+            },
+            {
+                week: 12, phase: 4, phaseTitle: "Phase 4: Taper & Race Week", focus: "RACE WEEK: Maximize glycogen, freshness & trust training", estMiles: "20.1 mi (inc. Race)",
+                schedule: [
+                    { day: "Mon", type: "Rest", category: "rest", title: "Rest & Hydrate", details: "Complete rest.", distance: "0 mi" },
+                    { day: "Tue", type: "Quality Run", category: "run", title: "3 Miles + Strides", details: "Easy 3 miles w/ 4x 20-sec light strides.", distance: "3.0 mi" },
+                    { day: "Wed", type: "Easy Run", category: "run", title: "Shakeout Run", details: "Very easy jog.", distance: "2.5 mi" },
+                    { day: "Thu", type: "Rest", category: "rest", title: "Rest & Carb-Load", details: "Carb loading & hydration focus.", distance: "0 mi" },
+                    { day: "Fri", type: "Rest", category: "rest", title: "Rest Day", details: "Lay out bib and race gear.", distance: "0 mi" },
+                    { day: "Sat", type: "Shakeout", category: "run", title: "1.5 Mile Shakeout", details: "Optional light shakeout run or full rest.", distance: "1.5 mi" },
+                    { day: "Sun", type: "RACE DAY", category: "run", title: "13.1 HALF MARATHON RACE", details: "Target: 2:00:00 - 2:04:00 (9:10-9:25/mi). Execute steady!", distance: "13.1 mi" }
+                ]
+            }
+        ];
+
+        const STORAGE_KEY = 'hm_plan_checked_items_v4';
+        let checkedItems = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        let activePhaseFilter = 'all';
+        let activeTypeFilter = 'all';
+
+        function renderPlan() {
+            const container = document.getElementById('weeks-container');
+            container.innerHTML = '';
+
+            const filteredPlan = activePhaseFilter === 'all' 
+                ? planData 
+                : planData.filter(w => w.phase === parseInt(activePhaseFilter));
+
+            filteredPlan.forEach(weekData => {
+                const weekCard = document.createElement('div');
+                weekCard.id = `week-${weekData.week}`;
+                weekCard.className = 'bg-white rounded-md clean-border shadow-sm overflow-hidden';
+
+                const filteredSchedule = weekData.schedule.filter(day => {
+                    if (activeTypeFilter === 'all') return true;
+                    if (activeTypeFilter === 'run') return day.category === 'run' || day.category === 'both';
+                    if (activeTypeFilter === 'strength') return day.category === 'strength' || day.category === 'both';
+                    if (activeTypeFilter === 'core') return day.category === 'core' || day.category === 'both';
+                    return true;
+                });
+
+                const totalNonRest = weekData.schedule.filter(d => d.category !== 'rest').length;
+                const completedCount = weekData.schedule.filter((d, idx) => d.category !== 'rest' && checkedItems[`w${weekData.week}_d${idx}`]).length;
+
+                weekCard.innerHTML = `
+                    <div class="p-4 bg-slate-100 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                            <span class="font-bold text-slate-800 text-base">Week ${weekData.week}: ${weekData.phaseTitle}</span>
+                            <p class="text-xs text-slate-600">${weekData.focus}</p>
+                        </div>
+                        <div class="text-right text-xs">
+                            <span class="text-slate-500 font-semibold">Est. Distance: ${weekData.estMiles}</span>
+                            <span class="mx-1 text-slate-300">|</span>
+                            <span class="font-bold text-slate-800">Progress: ${completedCount}/${totalNonRest}</span>
+                        </div>
+                    </div>
+
+                    <div class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
+                        ${filteredSchedule.map(day => {
+                            const origIdx = weekData.schedule.indexOf(day);
+                            const itemId = `w${weekData.week}_d${origIdx}`;
+                            const isChecked = !!checkedItems[itemId];
+                            const isRest = day.category === 'rest';
+
+                            return `
+                                <div class="p-3 rounded border ${isChecked ? 'border-slate-400 bg-slate-50' : 'border-slate-200 bg-white'} space-y-2 flex flex-col justify-between">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="font-bold text-slate-700">${day.day}</span>
+                                            <span class="text-[11px] text-slate-500 font-semibold">${day.type}</span>
+                                        </div>
+                                        <div class="text-xs font-bold ${isChecked ? 'line-through text-slate-400' : 'text-slate-900'}">${day.title}</div>
+                                        <p class="text-[11px] text-slate-600 leading-snug">${day.details}</p>
+                                    </div>
+
+                                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                                        <span class="font-semibold text-slate-700">${day.distance}</span>
+                                        ${!isRest ? `
+                                            <label class="inline-flex items-center space-x-1 cursor-pointer">
+                                                <input type="checkbox" onchange="toggleCheck('${itemId}')" ${isChecked ? 'checked' : ''} class="rounded border-slate-300 text-msblue">
+                                                <span class="text-[11px] text-slate-600">${isChecked ? 'Done' : 'Mark'}</span>
+                                            </label>
+                                        ` : '<span class="text-[11px] text-slate-400">Rest</span>'}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+
+                container.appendChild(weekCard);
+            });
+
+            updateProgressTotals();
+        }
+
+        function toggleCheck(itemId) {
+            checkedItems[itemId] = !checkedItems[itemId];
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedItems));
+            renderPlan();
+        }
+
+        function updateProgressTotals() {
+            let totalRun = 0, doneRun = 0;
+            let totalStrength = 0, doneStrength = 0;
+            let totalCore = 0, doneCore = 0;
+
+            planData.forEach(w => {
+                w.schedule.forEach((d, idx) => {
+                    const key = `w${w.week}_d${idx}`;
+                    if (d.category === 'run' || d.category === 'both') {
+                        totalRun++;
+                        if (checkedItems[key]) doneRun++;
+                    }
+                    if (d.category === 'strength' || d.category === 'both') {
+                        totalStrength++;
+                        if (checkedItems[key]) doneStrength++;
+                    }
+                    if (d.category === 'core' || d.category === 'both') {
+                        totalCore++;
+                        if (checkedItems[key]) doneCore++;
+                    }
+                });
+            });
+
+            document.getElementById('run-progress').innerText = `${doneRun}/${totalRun}`;
+            document.getElementById('strength-progress').innerText = `${doneStrength}/${totalStrength}`;
+            document.getElementById('core-progress').innerText = `${doneCore}/${totalCore}`;
+        }
+
+        function setPhaseFilter(phase) {
+            activePhaseFilter = phase;
+            ['all', '1', '2', '3', '4'].forEach(p => {
+                const el = document.getElementById(`phase-${p}`);
+                if (el) el.className = (p == phase) ? 'word-link word-link-active' : 'word-link';
+            });
+            renderPlan();
+        }
+
+        function setTypeFilter(type) {
+            activeTypeFilter = type;
+            ['all', 'run', 'strength', 'core'].forEach(t => {
+                const el = document.getElementById(`type-${t}`);
+                if (el) el.className = (t == type) ? 'word-link word-link-active' : 'word-link';
+            });
+            renderPlan();
+        }
+
+        function jumpToActiveWeek() {
+            let target = 1;
+            for (let w of planData) {
+                const pending = w.schedule.some((d, idx) => d.category !== 'rest' && !checkedItems[`w${w.week}_d${idx}`]);
+                if (pending) {
+                    target = w.week;
+                    break;
+                }
+            }
+            if (activePhaseFilter !== 'all') setPhaseFilter('all');
+            setTimeout(() => {
+                const el = document.getElementById(`week-${target}`);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        function scrollToCoreGuide() {
+            const guide = document.getElementById('core-guide');
+            if (guide) guide.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetProgress() {
+            if (confirm("Reset all completed checkmarks?")) {
+                checkedItems = {};
+                localStorage.removeItem(STORAGE_KEY);
+                renderPlan();
+            }
+        }
+
+        window.onload = function() {
+            renderPlan();
+        };
+    </script>
+</body>
+</html>
